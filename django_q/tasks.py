@@ -39,11 +39,12 @@ def async_task(func, *args, **kwargs):
     # get an id
     tag = uuid()
     # build the task package
+    task_name = (
+        keywords.pop("task_name", None) or q_options.pop("task_name", None) or tag[0]
+    )
     task = {
         "id": tag[1],
-        "name": keywords.pop("task_name", None)
-        or q_options.pop("task_name", None)
-        or tag[0],
+        "name": task_name,
         "func": func,
         "args": args,
     }
@@ -73,7 +74,7 @@ def async_task(func, *args, **kwargs):
         return _sync(pack)
     # push it
     enqueue_id = broker.enqueue(pack)
-    logger.info(f"Enqueued [{broker.list_key}] {enqueue_id}")
+    logger.info(f"Enqueued [{broker.list_key}] {enqueue_id} {task_name}")
     logger.debug(f"Pushed {tag}")
     return task["id"]
 
